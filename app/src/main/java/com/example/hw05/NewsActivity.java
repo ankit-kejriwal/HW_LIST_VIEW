@@ -4,11 +4,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -28,6 +31,8 @@ public class NewsActivity extends AppCompatActivity {
 
     ProgressDialog progressDialog;
     ListView listView;
+    ArrayList<News> newsList;
+    public static int  REQ_CODE = 123;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +48,20 @@ public class NewsActivity extends AppCompatActivity {
         } else {
             Toast.makeText(NewsActivity.this, "No Active connection", Toast.LENGTH_SHORT).show();
         }
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                Intent intent = new Intent(NewsActivity.this,WebViewActivity.class);
+                intent.putExtra("newsURL",newsList.get(i).getUrl());
+                startActivityForResult(intent,REQ_CODE);
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
     }
 
     private boolean isConnected() {
@@ -114,7 +133,8 @@ public class NewsActivity extends AppCompatActivity {
         protected void onPreExecute() {
             progressDialog = new ProgressDialog(NewsActivity.this);
             progressDialog.setMessage("Loading");
-            progressDialog.setMax(10);
+            progressDialog.setProgress(0);
+            progressDialog.setMax(20);
             progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDialog.setCancelable(false);
             progressDialog.show();
@@ -128,6 +148,7 @@ public class NewsActivity extends AppCompatActivity {
 
     private void loadListView(ArrayList<News> news){
         NewsAdapter adapter = new NewsAdapter(this,R.layout.news_item,news);
+        newsList = news;
         listView.setAdapter(adapter);
         progressDialog.dismiss();
 
